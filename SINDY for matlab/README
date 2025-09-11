@@ -1,0 +1,23 @@
+Sparse Identification of Nonlinear Dynamics (SINDY)
+
+Copyright 2015, All Rights Reserved
+Code by Steven L. Brunton (sbrunton@uw.edu)
+For Paper, "Discovering Governing Equations from Data: 
+        Sparse Identification of Nonlinear Dynamical Systems" 
+by S. L. Brunton, J. L. Proctor, and J. N. Kutz
+
+
+The core algorithms are in the "utils" directory:
+
+    poolData.m (creates nonlinear feature library "Theta")
+    sparsifyDynamics (solves for sparse vector of coefficients "Xi" given data... could be replaced with LASSO command in Matlab)
+    sparseGalerkin.m (computes new sparse right-hand-side function using sparse vector of coefficients "Xi")
+
+The vector fields used are also in "utils"
+
+Code to generate models and figures for each example (ordered as in the supplement) are given in .m files "EX01" "EX02", etc. in the main directory.
+
+We also use some other functions that are freely available online: 
+
+    TVRegDiff (total-variation regularized differentiation)
+    color_line3 (changes color of line by specified value) 
