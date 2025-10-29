@@ -1,1 +1,5 @@
-Here is modified code from marcus main framework
+Here are modified code from marcus main framework.
+
+The 3D multiaxial LOAD presents a multiaxial generated data as well (tensor load)
+
+The 3D uniaxial has a 3D framework but the generated data (uniaxial load)
