@@ -7,8 +7,6 @@ stress/strain rate components instead of von Mises equivalents.
 Key insight: Each deviatoric component follows the Maxwell equation independently:
     dS_ij/dt = 2G * dε_ij^dev/dt - (2G/η) * S_ij
 
-Since deviatoric stress CAN BE NEGATIVE, this works correctly!
-
 Author: Generated for DataDrivenProject
 Date: 2025-12-02
 """
