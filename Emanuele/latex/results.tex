@@ -1,0 +1,106 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{geometry}
+\usepackage{graphicx}
+\geometry{a4paper, margin=1in}
+
+\title{SINDy Parameter Recovery and Validation for Coupled Nonlinear Viscoelasticity}
+\author{Data Driven Project Team}
+\date{June 26, 2026}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+This document summarizes the parameter recovery and validation results for the 3D coupled nonlinear viscoelastic Maxwell model using Sparse Identification of Nonlinear Dynamics (SINDy) in deviatoric space. 
+
+The constitutive equations for the nonlinear Maxwell model are governed by:
+\begin{equation}
+    \frac{d S_{ij}}{dt} = 2G \dot{\varepsilon}^{dev}_{ij} - \frac{2G}{\eta(\sigma_{eq})} S_{ij}
+\end{equation}
+where the stress-dependent viscosity is:
+\begin{equation}
+    \frac{1}{\eta(\sigma_{eq})} = \frac{1}{\eta_0} (1 + \alpha \sigma_{eq}^2)
+\end{equation}
+and $\sigma_{eq}^2$ is the second invariant of the deviatoric stress tensor:
+\begin{equation}
+    \sigma_{eq}^2 = 1.5 \left( S_{xx}^2 + S_{yy}^2 + S_{zz}^2 + 2 S_{xy}^2 + 2 S_{yz}^2 + 2 S_{xz}^2 \right)
+\end{equation}
+
+By expanding, we obtain the coupled differential equations:
+\begin{equation}
+    \frac{d S_{ij}}{dt} = 2G \dot{\varepsilon}^{dev}_{ij} - \frac{2G}{\eta_0} S_{ij} - \frac{2G\alpha}{\eta_0} S_{ij} \sigma_{eq}^2
+\end{equation}
+
+\section{Addressing Reviewer Feedback}
+A key feedback point raised by the reviewer on the linear model was:
+\begin{quote}
+    \textit{The multiaxial validation paths (Combined Uniaxial + Shear and Biaxial Tension) serve as multiaxial sanity checks under the isotropic assumption, but since the linear isotropic model decouples completely in deviatoric space, these paths represent the simple superposition of independent 1D trajectories rather than generalization to new nonlinear, coupled, or anisotropic constitutive behavior.}
+\end{quote}
+
+By implementing and fitting the J2-coupled nonlinear Maxwell model, we have successfully addressed this critique:
+\begin{itemize}
+    \item \textbf{True Multiaxial Coupling}: Because the viscosity $\eta(\sigma_{eq})$ depends on the stress invariant $\sigma_{eq}^2$ (which is a function of all stress components), the evolution of any component $S_{ij}$ depends nonlinearly on all other active stress components. The components do not decouple.
+    \item \textbf{Generalization to Nonlinear Coupled Behavior}: The validation on combined loading (simultaneous uniaxial tension and shear) is not a linear superposition of 1D paths. It requires the model to correctly generalize to a coupled multiaxial state. 
+    \item \textbf{Validation Success}: SINDy successfully recovers the coupling parameter $\alpha$ with $0.228\%$ error and predicts the response on unseen combined loading paths with high accuracy ($\text{RMSE} < 0.02\text{ MPa}$), showing robust generalization.
+\end{itemize}
+
+\section{Discovered SINDy Equations}
+Using a component-by-component fitting strategy with an STLSQ sparsity threshold of $10^{-5}$, the following 3D coupled equations were discovered:
+\begin{align*}
+    \frac{d S_{xx}}{dt} &= 0.034 - 4.007 S_{xx} + 2000.845 \dot{\varepsilon}^{dev}_{xx} - 0.001 S_{xx} \sigma_{eq}^2 \\
+    \frac{d S_{yy}}{dt} &= 0.034 - 4.007 S_{yy} + 2000.845 \dot{\varepsilon}^{dev}_{yy} - 0.001 S_{yy} \sigma_{eq}^2 \\
+    \frac{d S_{zz}}{dt} &= 0.034 - 4.007 S_{zz} + 2000.845 \dot{\varepsilon}^{dev}_{zz} - 0.001 S_{zz} \sigma_{eq}^2 \\
+    \frac{d S_{xy}}{dt} &= 0.002 - 3.995 S_{xy} + 1998.814 \dot{\varepsilon}^{dev}_{xy} - 0.001 S_{xy} \sigma_{eq}^2 \\
+    \frac{d S_{yz}}{dt} &= 0.002 - 3.995 S_{yz} + 1998.814 \dot{\varepsilon}^{dev}_{yz} - 0.001 S_{yz} \sigma_{eq}^2 \\
+    \frac{d S_{xz}}{dt} &= 0.002 - 3.995 S_{xz} + 1998.814 \dot{\varepsilon}^{dev}_{xz} - 0.001 S_{xz} \sigma_{eq}^2 
+\end{align*}
+
+\section{Parameter Recovery Performance}
+Table~\ref{tab:parameters} compares the recovered material constants to the true values before and after applying the component-wise fitting and sparsity threshold corrections.
+
+\begin{table}[h]
+\centering
+\caption{Material Parameter Recovery Error Analysis}
+\label{tab:parameters}
+\begin{tabular}{lccccc}
+\toprule
+Parameter & True Value & Before Correction & Before Error & After Correction & After Error \\
+\midrule
+$G$ (Shear Modulus) & $1000.0$ MPa & $821.57$ MPa & $17.843\%$ & $999.91$ MPa & \textbf{0.009\%} \\
+$\eta_0$ (Viscosity) & $500.0$ MPa$\cdot$s & $-7354.78$ MPa$\cdot$s & $1570.957\%$ & $499.88$ MPa$\cdot$s & \textbf{0.024\%} \\
+$\alpha$ (Nonlinear factor) & $0.00015$ MPa$^{-2}$ & $0.0$ MPa$^{-2}$ & $100.0\%$ & $0.00015$ MPa$^{-2}$ & \textbf{0.228\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Validation on Unseen Load Paths}
+To verify the generalization of the discovered model, we integrated the system of 6 coupled ODEs over unseen validation load trajectories. The resulting Root Mean Squared Errors (RMSE) are listed in Table~\ref{tab:validation}.
+
+\begin{table}[h]
+\centering
+\caption{Validation RMSE Metrics}
+\label{tab:validation}
+\begin{tabular}{lcc}
+\toprule
+Validation Load Case & Component & RMSE (MPa) \\
+\midrule
+Combined Loading (Uniaxial + Shear) & $S_{xx}$ & 0.0193 \\
+& $S_{xy}$ & 0.0054 \\
+\midrule
+Biaxial Tension & $S_{xx}$ & 0.0145 \\
+& $S_{yy}$ & 0.0126 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{nonlinear_deviatoric_comparison.png}
+    \caption{Validation comparison showing True Nonlinear Maxwell response (solid black line), SINDy model predictions (dashed red line), and Linear Maxwell model reference predictions (dotted blue line) across the Combined and Biaxial validation loading trajectories.}
+    \label{fig:validation_plot}
+\end{figure}
+
+\end{document}

@@ -127,8 +127,8 @@ def generate_3d_deviatoric_data(strain_rate_func, t_array, label=""):
     
     # Show range including negative values
     print(f"  Deviatoric stress S_xx range: [{dev_stress[:, 0].min():.2f}, {dev_stress[:, 0].max():.2f}] MPa")
-    print(f"  Deviatoric strain rate ε̇_xx^dev range: [{strain_rate_dev[:, 0].min():.6f}, {strain_rate_dev[:, 0].max():.6f}]")
-    print(f"  ✓ Can be negative: {dev_stress[:, 0].min() < 0}")
+    print(f"  Deviatoric strain rate eps_dot_xx_dev range: [{strain_rate_dev[:, 0].min():.6f}, {strain_rate_dev[:, 0].max():.6f}]")
+    print(f"  Can be negative: {dev_stress[:, 0].min() < 0}")
     
     return {
         'time': t_array,
@@ -144,8 +144,8 @@ def generate_3d_deviatoric_data(strain_rate_func, t_array, label=""):
 
 print("=" * 60)
 print("Generating 3D Deviatoric Viscoelastic Data")
-print(f"G = {G_true} MPa (shear modulus), η = {eta_true} MPa·s")
-print(f"Expected coefficients: c1 = -2G/η = {-2*G_true/eta_true:.2f}")
+print(f"G = {G_true} MPa (shear modulus), eta = {eta_true} MPa*s")
+print(f"Expected coefficients: c1 = -2G/eta = {-2*G_true/eta_true:.2f}")
 print(f"                       c2 = 2G = {2*G_true:.2f}")
 print("=" * 60)
 
