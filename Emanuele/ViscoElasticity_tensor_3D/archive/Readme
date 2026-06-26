@@ -1,0 +1,7 @@
+Three codes are present in this folder:
+1. simple_visco_sindy.py
+    This one is the simple 1D example
+2. simple_visco_sindy_deviatoric.py
+    This one is using deviatoric stress but it is working
+3. simple_visco_sindy_3D.py
+    This one is using Von-Mises but it is not working
