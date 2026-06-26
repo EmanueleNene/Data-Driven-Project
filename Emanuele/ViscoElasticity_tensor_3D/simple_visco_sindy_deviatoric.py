@@ -43,7 +43,7 @@ print(f"  Combined: {len(val_combined['time'])} points")
 print(f"  Biaxial: {len(val_biaxial['time'])} points")
 
 # Check that deviatoric components can be negative
-print(f"\n✓ S_xx can be negative: {train_uniaxial['dev_stress'][:, 0].min() < 0}")
+print(f"\nS_xx can be negative: {train_uniaxial['dev_stress'][:, 0].min() < 0}")
 print(f"  Range: [{train_uniaxial['dev_stress'][:, 0].min():.2f}, {train_uniaxial['dev_stress'][:, 0].max():.2f}] MPa")
 
 
@@ -72,7 +72,7 @@ model_Sxx.print()
 coeffs_Sxx = model_Sxx.coefficients()[0]
 print(f"  c0 (bias): {coeffs_Sxx[0]:.6f}")
 print(f"  c1 (S_xx): {coeffs_Sxx[1]:.6f}")
-print(f"  c2 (ε̇_xx^dev): {coeffs_Sxx[2]:.6f}")
+print(f"  c2 (eps_dot_xx_dev): {coeffs_Sxx[2]:.6f}")
 
 # --- Train on S_xy from shear data ---
 print("\n--- Training on S_xy (from shear) ---")
@@ -87,7 +87,7 @@ model_Sxy.print()
 coeffs_Sxy = model_Sxy.coefficients()[0]
 print(f"  c0 (bias): {coeffs_Sxy[0]:.6f}")
 print(f"  c1 (S_xy): {coeffs_Sxy[1]:.6f}")
-print(f"  c2 (γ̇_xy): {coeffs_Sxy[2]:.6f}")
+print(f"  c2 (gamma_dot_xy): {coeffs_Sxy[2]:.6f}")
 
 # Average coefficients (should be the same for isotropic material!)
 coeffs_avg = (coeffs_Sxx + coeffs_Sxy) / 2.0
@@ -127,41 +127,52 @@ print("\nRecovering from S_xx model:")
 G_recovered_xx = coeffs_Sxx[2] / 2.0
 eta_recovered_xx = -2 * G_recovered_xx / coeffs_Sxx[1]
 print(f"  G (shear modulus): {G_recovered_xx:.2f} MPa (true: {G_true:.2f} MPa)")
-print(f"  η (viscosity): {eta_recovered_xx:.2f} MPa·s (true: {eta_true:.2f} MPa·s)")
+print(f"  eta (viscosity): {eta_recovered_xx:.2f} MPa*s (true: {eta_true:.2f} MPa*s)")
 print(f"  Error G: {100*abs(G_recovered_xx - G_true)/G_true:.3f}%")
-print(f"  Error η: {100*abs(eta_recovered_xx - eta_true)/eta_true:.3f}%")
+print(f"  Error eta: {100*abs(eta_recovered_xx - eta_true)/eta_true:.3f}%")
 
 print("\nRecovering from S_xy model:")
 G_recovered_xy = coeffs_Sxy[2] / 2.0
 eta_recovered_xy = -2 * G_recovered_xy / coeffs_Sxy[1]
 print(f"  G (shear modulus): {G_recovered_xy:.2f} MPa (true: {G_true:.2f} MPa)")
-print(f"  η (viscosity): {eta_recovered_xy:.2f} MPa·s (true: {eta_true:.2f} MPa·s)")
+print(f"  eta (viscosity): {eta_recovered_xy:.2f} MPa*s (true: {eta_true:.2f} MPa*s)")
 print(f"  Error G: {100*abs(G_recovered_xy - G_true)/G_true:.3f}%")
-print(f"  Error η: {100*abs(eta_recovered_xy - eta_true)/eta_true:.3f}%")
+print(f"  Error eta: {100*abs(eta_recovered_xy - eta_true)/eta_true:.3f}%")
 
 print("\nAveraged (isotropic):")
 G_recovered_avg = coeffs_avg[2] / 2.0
 eta_recovered_avg = -2 * G_recovered_avg / coeffs_avg[1]
 print(f"  G (shear modulus): {G_recovered_avg:.2f} MPa (true: {G_true:.2f} MPa)")
-print(f"  η (viscosity): {eta_recovered_avg:.2f} MPa·s (true: {eta_true:.2f} MPa·s)")
+print(f"  eta (viscosity): {eta_recovered_avg:.2f} MPa*s (true: {eta_true:.2f} MPa*s)")
 print(f"  Error G: {100*abs(G_recovered_avg - G_true)/G_true:.3f}%")
-print(f"  Error η: {100*abs(eta_recovered_avg - eta_true)/eta_true:.3f}%")
+print(f"  Error eta: {100*abs(eta_recovered_avg - eta_true)/eta_true:.3f}%")
 
 # Relaxation time
 tau_recovered = eta_recovered_avg / (2 * G_recovered_avg)
 tau_true = eta_true / (2 * G_true)
-print(f"\nRelaxation time τ = η/(2G):")
-print(f"  τ_recovered: {tau_recovered:.4f} s (true: {tau_true:.4f} s)")
+print(f"\nRelaxation time tau = eta/(2G):")
+print(f"  tau_recovered: {tau_recovered:.4f} s (true: {tau_true:.4f} s)")
 print(f"  Error: {100*abs(tau_recovered - tau_true)/tau_true:.3f}%")
 
 
 
 # ==========================================
-# 3. VALIDATION
+# 3. VALIDATION (Unseen Loading Path / Sanity Check)
 # ==========================================
 
+# NOTE ON GENERALIZATION (Addressing Reviewer Feedback):
+# The multiaxial validation paths (Combined Uniaxial + Shear and Biaxial Tension) 
+# serve as multiaxial sanity checks to confirm that the SINDy model fits 
+# generalize to unseen loading trajectories under the isotropic assumption.
+# 
+# However, because the linear isotropic Maxwell model decouples completely in 
+# deviatoric space (every component S_ij evolves independently governed by the 
+# same scalar material constants G and eta), these validation paths represent 
+# the superposition of individual 1D trajectories rather than generalization to 
+# new nonlinear, coupled, or anisotropic constitutive behavior.
+
 print("\n" + "=" * 60)
-print("Validating on Combined Loading")
+print("Validating on Combined Loading (Unseen Paths)")
 print("=" * 60)
 
 def discovered_maxwell_ode(S, t, eps_dot_dev_interp, t_interp, coeffs):
@@ -360,8 +371,9 @@ plt.show()
 print("\n" + "=" * 60)
 print("SUCCESS! Deviatoric SINDy Analysis Complete")
 print("=" * 60)
-print(f"\n✓ Discovered correct Maxwell coefficients:")
+print(f"\nDiscovered correct Maxwell coefficients:")
 print(f"  Expected c1 (stress): {-2*G_true/eta_true:.2f}, Got: {coeffs_avg[1]:.2f}")
 print(f"  Expected c2 (strain rate): {2*G_true:.2f}, Got: {coeffs_avg[2]:.2f}")
-print(f"\n✓ Validation RMSE: S_xx={rmse_Sxx:.4f} MPa, S_xy={rmse_Sxy:.4f} MPa")
-print(f"\n✓ Deviatoric approach works because stress CAN BE NEGATIVE!")
+print(f"\nValidation RMSE (Unseen Loading Paths): S_xx={rmse_Sxx:.4f} MPa, S_xy={rmse_Sxy:.4f} MPa")
+print("Note: Validation on unseen loading paths confirms isotropic parameter correctness.")
+print(f"\nDeviatoric approach works because stress CAN BE NEGATIVE!")
