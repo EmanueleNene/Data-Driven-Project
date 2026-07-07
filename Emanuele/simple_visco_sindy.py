@@ -105,6 +105,17 @@ for th in sweep_thresholds:
     sweep_patterns.append(pattern)
     print(f"threshold={th}: nonzero indices={pattern}, coeffs={c}")
 
+# Wider sweep, plotting only — shows the plateau in context (below 0.5: noise floor,
+# spurious terms; [0.5, 3.0]: stable plateau; above 3.0: over-pruning). Not used in the
+# stability assertion above, which only checks the reasonable [0.5, 3.0] band.
+plot_thresholds = [0.01, 0.05, 0.1, 0.5, 1.0, 2.0, 3.0, 5.0, 8.0]
+plot_sweep_coeffs = []
+for th in plot_thresholds:
+    m = ps.SINDy(feature_library=poly_lib, optimizer=ps.STLSQ(threshold=th))
+    m.fit(X_train, u=U_train, t=dt, feature_names=["sig", "eps_dot"])
+    plot_sweep_coeffs.append(m.coefficients()[0])
+plot_sweep_coeffs = np.array(plot_sweep_coeffs)
+
 assert len(set(sweep_patterns)) == 1, (
     f"Sparsity pattern is not stable across thresholds {sweep_thresholds}: "
     f"{list(zip(sweep_thresholds, sweep_patterns))}. A threshold-dependent pattern means "
@@ -175,78 +186,94 @@ sig_val_pred = odeint(discovered_ode, 0.0, t, args=(eps_dot_val, t, coeffs)).fla
 # 4. VISUALIZATION
 # ==========================================
 
-plt.figure(figsize=(18, 10))
+import os
+FIG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "figures", "1D")
+os.makedirs(FIG_DIR, exist_ok=True)
 
-# --- Row 1: Training Data ---
-
-# 1. Training Inputs
-plt.subplot(2, 3, 1)
-plt.plot(t, eps_train, 'b-', label=r'$\epsilon$ (Strain)')
-plt.plot(t, eps_dot_train, 'g-', alpha=0.7, label=r'$\dot{\epsilon}$ (Strain Rate)')
-plt.title("Training Inputs (Rich Signal)")
-plt.xlabel("Time")
-plt.ylabel("Magnitude")
-plt.legend()
-plt.grid(True, alpha=0.3)
-
-# 2. Training Outputs (Fit)
-# Reconstruct on training data to show fit quality
 sig_train_pred = odeint(discovered_ode, 0.0, t, args=(eps_dot_train, t, coeffs)).flatten()
 
-plt.subplot(2, 3, 2)
-plt.plot(t, sig_train_noisy, 'k.', alpha=0.1, label="Noisy Data (Input to SINDy)")
-plt.plot(t, sig_train, 'k-', alpha=0.3, label="True Signal")
-plt.plot(t, sig_train_pred, 'r--', lw=2, label="SINDy Fit")
-plt.title("Training Outputs (Reconstruction)")
-plt.xlabel("Time")
-plt.ylabel("Stress")
-plt.legend()
+
+def save_panel(name, plot_fn):
+    plt.figure(figsize=(7, 5))
+    plot_fn()
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    path = os.path.join(FIG_DIR, name)
+    plt.savefig(path, dpi=150)
+    print(f"Saved {path}")
+    plt.show()
+
+
+# 1. Training Inputs (Rich Signal)
+def _p1():
+    plt.plot(t, eps_train, 'b-', label=r'$\epsilon$ (Strain)')
+    plt.plot(t, eps_dot_train, 'g-', alpha=0.7, label=r'$\dot{\epsilon}$ (Strain Rate)')
+    plt.xlabel("Time")
+    plt.ylabel("Magnitude")
+save_panel("01_training_inputs_rich_signal.png", _p1)
+
+# 2. Training Outputs (Reconstruction)
+def _p2():
+    plt.plot(t, sig_train_noisy, 'k.', alpha=0.1, label="Noisy Data (Input to SINDy)")
+    plt.plot(t, sig_train, 'k-', alpha=0.3, label="True Signal")
+    plt.plot(t, sig_train_pred, 'r--', lw=2, label="SINDy Fit")
+    plt.xlabel("Time")
+    plt.ylabel("Stress")
+save_panel("02_training_outputs_reconstruction.png", _p2)
+
+# 3. Training Stress-Strain
+def _p3():
+    plt.plot(eps_train, sig_train, 'k-', alpha=0.3, label="True")
+    plt.plot(eps_train, sig_train_pred, 'r--', lw=2, label="SINDy Fit")
+    plt.xlabel(r"Strain $\epsilon$")
+    plt.ylabel(r"Stress $\sigma$")
+save_panel("03_training_stress_strain.png", _p3)
+
+# 4. Validation Inputs (Unseen Signal)
+def _p4():
+    plt.plot(t, eps_val, 'b-', label=r'$\epsilon$ (Strain)')
+    plt.plot(t, eps_dot_val, 'g-', alpha=0.7, label=r'$\dot{\epsilon}$ (Strain Rate)')
+    plt.xlabel("Time")
+    plt.ylabel("Magnitude")
+save_panel("04_validation_inputs_unseen_signal.png", _p4)
+
+# 5. Validation Outputs (Generalization)
+def _p5():
+    plt.plot(t, sig_val, 'k-', lw=1, label="True Signal")
+    plt.plot(t, sig_val_pred, 'r--', lw=2, label="SINDy Prediction")
+    plt.xlabel("Time")
+    plt.ylabel("Stress")
+save_panel("05_validation_outputs_generalization.png", _p5)
+
+# 6. Validation Stress-Strain
+def _p6():
+    plt.plot(eps_val, sig_val, 'k-', lw=1, label="True")
+    plt.plot(eps_val, sig_val_pred, 'r--', lw=2, label="SINDy Prediction")
+    plt.xlabel(r"Strain $\epsilon$")
+    plt.ylabel(r"Stress $\sigma$")
+save_panel("06_validation_stress_strain.png", _p6)
+
+# --- Threshold sensitivity sweep plot ---
+# Visual evidence for the reviewer point: coefficient magnitude vs. threshold for every
+# library term. The true terms (sig, eps_dot) stay flat across [0.5, 3.0]; spurious terms
+# (e.g. eps_dot^3) are large and unstable below 0.5, and everything but eps_dot collapses
+# above 3.0 (over-pruning).
+feature_names_full = poly_lib.get_feature_names(["sig", "eps_dot"])
+plt.figure(figsize=(9, 6))
+for idx in range(plot_sweep_coeffs.shape[1]):
+    vals = plot_sweep_coeffs[:, idx]
+    if np.allclose(vals, 0.0):
+        continue
+    plt.plot(plot_thresholds, vals, marker='o', label=feature_names_full[idx])
+plt.axvspan(0.5, 3.0, color='green', alpha=0.1, label="Stable plateau [0.5, 3.0]")
+plt.xscale('log')
+plt.xlabel("STLSQ threshold")
+plt.ylabel("Coefficient value")
+plt.legend(fontsize=8)
 plt.grid(True, alpha=0.3)
-
-# 3. Training Stress-Strain Plot
-plt.subplot(2, 3, 3)
-plt.plot(eps_train, sig_train, 'k-', alpha=0.3, label="True")
-plt.plot(eps_train, sig_train_pred, 'r--', lw=2, label="SINDy Fit")
-plt.title("Training Stress-Strain")
-plt.xlabel(r"Strain $\epsilon$")
-plt.ylabel(r"Stress $\sigma$")
-plt.legend()
-plt.grid(True, alpha=0.3)
-
-# --- Row 2: Validation Data ---
-
-# 4. Validation Inputs
-plt.subplot(2, 3, 4)
-plt.plot(t, eps_val, 'b-', label=r'$\epsilon$ (Strain)')
-plt.plot(t, eps_dot_val, 'g-', alpha=0.7, label=r'$\dot{\epsilon}$ (Strain Rate)')
-plt.title("Validation Inputs (Unseen Signal)")
-plt.xlabel("Time")
-plt.ylabel("Magnitude")
-plt.legend()
-plt.grid(True, alpha=0.3)
-
-# 5. Validation Outputs (Prediction)
-plt.subplot(2, 3, 5)
-plt.plot(t, sig_val, 'k-', lw=1, label="True Signal")
-plt.plot(t, sig_val_pred, 'r--', lw=2, label="SINDy Prediction")
-plt.title("Validation Outputs (Generalization)")
-plt.xlabel("Time")
-plt.ylabel("Stress")
-plt.legend()
-plt.grid(True, alpha=0.3)
-
-# 6. Validation Stress-Strain Plot
-plt.subplot(2, 3, 6)
-plt.plot(eps_val, sig_val, 'k-', lw=1, label="True")
-plt.plot(eps_val, sig_val_pred, 'r--', lw=2, label="SINDy Prediction")
-plt.title("Validation Stress-Strain")
-plt.xlabel(r"Strain $\epsilon$")
-plt.ylabel(r"Stress $\sigma$")
-plt.legend()
-plt.grid(True, alpha=0.3)
-
 plt.tight_layout()
+sweep_fname = "07_threshold_sensitivity_sweep_degree3_library.png"
+plt.savefig(os.path.join(FIG_DIR, sweep_fname), dpi=150)
+print(f"Saved {os.path.join(FIG_DIR, sweep_fname)}")
 plt.show()
-#plt.tight_layout()
-#plt.savefig('maxwell_sindy_comprehensive.png')
-#print("\nPlot saved to maxwell_sindy_comprehensive.png")

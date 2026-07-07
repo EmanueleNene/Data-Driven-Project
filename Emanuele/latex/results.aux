@@ -1,14 +1,37 @@
 \relax 
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2}Addressing Reviewer Feedback}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Discovered SINDy Equations}{2}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Parameter Recovery Performance}{2}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Material Parameter Recovery Error Analysis}}{2}{}\protected@file@percent }
-\newlabel{tab:parameters}{{1}{2}{}{table.1}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Validation on Unseen Load Paths}{2}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Validation RMSE Metrics}}{2}{}\protected@file@percent }
-\newlabel{tab:validation}{{2}{2}{}{table.2}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Addressing Reviewer Feedback: Standalone Script Robustness and Figure Provenance}{2}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Validation comparison showing True Nonlinear Maxwell response (solid black line), SINDy model predictions (dashed red line), and Linear Maxwell model reference predictions (dotted blue line) across the Combined and Biaxial validation loading trajectories.}}{3}{}\protected@file@percent }
-\newlabel{fig:validation_plot}{{1}{3}{}{figure.1}{}}
-\gdef \@abspage@last{4}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Methodology: Deviatoric Component-wise SINDy Fitting}{1}{}\protected@file@percent }
+\newlabel{sec:methodology}{{2}{1}{}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}State variables and features}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Why component-by-component, not one 6D fit}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Assembling the full 6-component model}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Parameter recovery}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Validation rollout}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Open item.}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Addressing Reviewer Feedback}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Discovered SINDy Equations}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Parameter Recovery Performance}{3}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Material Parameter Recovery Error Analysis}}{3}{}\protected@file@percent }
+\newlabel{tab:parameters}{{1}{3}{}{table.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Validation on Unseen Load Paths}{3}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Validation comparison showing True Nonlinear Maxwell response (solid black line), SINDy model predictions (dashed red line), and Linear Maxwell model reference predictions (dotted blue line) across the Combined and Biaxial validation loading trajectories.}}{4}{}\protected@file@percent }
+\newlabel{fig:validation_plot}{{1}{4}{}{figure.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Validation RMSE Metrics}}{5}{}\protected@file@percent }
+\newlabel{tab:validation}{{2}{5}{}{table.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Addressing Reviewer Feedback: Standalone Script Robustness and Figure Provenance}{5}{}\protected@file@percent }
+\newlabel{sec:1d-robustness}{{7}{5}{}{section.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}1D Viscoelastic Figures (\texttt  {Emanuele/simple\_visco\_sindy.py})}{6}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \texttt  {01\_training\_inputs\_rich\_signal.png} -- The 5-sine training excitation ($\varepsilon $, blue; $\dot  {\varepsilon }$, green). This replaces the original narrow 2-sine signal; the wider amplitude and added frequency content is what breaks the $\dot  {\varepsilon }/\dot  {\varepsilon }^3$ collinearity discussed above.}}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}3D Deviatoric Validation Figures (\texttt  {ViscoElasticity\_tensor\_3D/NonLinear\_3D/fit\_nonlinear\_deviatoric\_sindy.py})}{6}{}\protected@file@percent }
+\newlabel{sec:3d-figures}{{7.2}{6}{}{subsection.7.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces \texttt  {02\_training\_outputs\_reconstruction.png} -- SINDy's reconstructed stress (red dashed) against the noisy training data (black dots) and the noise-free true signal (black line), over the training window.}}{7}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces \texttt  {03\_training\_stress\_strain.png} -- Same training reconstruction, viewed as a stress-strain hysteresis loop rather than a time series.}}{7}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces \texttt  {04\_validation\_inputs\_unseen\_signal.png} -- The single-frequency validation excitation, never seen during training, used to test generalization.}}{8}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces \texttt  {05\_validation\_outputs\_generalization.png} -- SINDy prediction (red dashed) vs. true signal (black) on the unseen validation excitation, integrated forward with \texttt  {discovered\_ode} and the coefficients recovered at $\texttt  {threshold}=1.0$.}}{8}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces \texttt  {06\_validation\_stress\_strain.png} -- Validation result as a stress-strain loop.}}{9}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces \texttt  {07\_threshold\_sensitivity\_sweep\_degree3\_library.png} -- Coefficient value vs. STLSQ threshold (log scale) for every term in the degree-3 library. The true terms ($\sigma $, $\dot  {\varepsilon }$) are flat across the whole range shown; all other terms sit at zero once inside the green plateau $[0.5, 3.0]$. This is the direct visual evidence that the recovered sparsity pattern is not an artifact of one hand-picked threshold.}}{9}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces \texttt  {01\_combined\_Sxx\_rmse0.0193.png} -- $S_{xx}$ under the combined uniaxial+shear validation load: true nonlinear Maxwell response (solid black), SINDy prediction (dashed red), and the linear Maxwell reference with $\alpha =0$ (dotted blue). RMSE $=0.0193$ MPa.}}{10}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces \texttt  {02\_combined\_Sxy\_rmse0.0054.png} -- $S_{xy}$ under the same combined validation load. RMSE $=0.0054$ MPa.}}{10}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces \texttt  {03\_biaxial\_Sxx\_rmse0.0145.png} -- $S_{xx}$ under the biaxial tension validation load. RMSE $=0.0145$ MPa.}}{11}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces \texttt  {04\_biaxial\_Syy\_rmse0.0126.png} -- $S_{yy}$ under the same biaxial validation load. RMSE $=0.0126$ MPa.}}{11}{}\protected@file@percent }
+\gdef \@abspage@last{11}

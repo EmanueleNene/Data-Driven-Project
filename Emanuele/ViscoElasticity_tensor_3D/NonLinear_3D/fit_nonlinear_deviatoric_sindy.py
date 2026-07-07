@@ -334,6 +334,36 @@ plt.savefig(plot_path, dpi=150)
 plt.close()
 print(f"Updated comparison plot saved to: nonlinear_deviatoric_comparison.png")
 
+# --- Also save each validation panel as its own file, for figure-by-figure report reference ---
+fig3d_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "figures", "3D")
+fig3d_dir = os.path.normpath(fig3d_dir)
+os.makedirs(fig3d_dir, exist_ok=True)
+
+panels = [
+    (f"01_combined_Sxx_rmse{rmse_comb_xx:.4f}.png", val_combined['time'], val_combined['dev_stress'][:, 0],
+     S_pred_comb[:, 0], S_lin_comb[:, 0]),
+    (f"02_combined_Sxy_rmse{rmse_comb_xy:.4f}.png", val_combined['time'], val_combined['dev_stress'][:, 3],
+     S_pred_comb[:, 3], S_lin_comb[:, 3]),
+    (f"03_biaxial_Sxx_rmse{rmse_biax_xx:.4f}.png", val_biaxial['time'], val_biaxial['dev_stress'][:, 0],
+     S_pred_biax[:, 0], S_lin_biax[:, 0]),
+    (f"04_biaxial_Syy_rmse{rmse_biax_yy:.4f}.png", val_biaxial['time'], val_biaxial['dev_stress'][:, 1],
+     S_pred_biax[:, 1], S_lin_biax[:, 1]),
+]
+for fname, time_arr, true_arr, sindy_arr, lin_arr in panels:
+    plt.figure(figsize=(7, 5))
+    plt.plot(time_arr, true_arr, 'k-', lw=2, label='True Nonlinear Maxwell')
+    plt.plot(time_arr, sindy_arr, 'r--', lw=2, label='SINDy Model')
+    plt.plot(time_arr, lin_arr, 'b:', alpha=0.6, label='Linear Maxwell (Reference)')
+    plt.xlabel("Time (s)")
+    plt.ylabel("Stress (MPa)")
+    plt.grid(True, alpha=0.3)
+    plt.legend()
+    plt.tight_layout()
+    out_path = os.path.join(fig3d_dir, fname)
+    plt.savefig(out_path, dpi=150)
+    plt.close()
+    print(f"Saved {out_path}")
+
 print("=" * 60)
 print("SUCCESS: Nonlinear SINDy fitting, validation, and plotting complete!")
 print("=" * 60)

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.2.26)  7 JUL 2026 17:50
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.2.26)  7 JUL 2026 21:22
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -166,20 +166,20 @@ File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
 ) (results.aux)
 \openout1 = `results.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -240,67 +240,186 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 (C:\Users\emanu\AppData\Local\Programs\MiKTeX\tex/latex/00miktex\epstopdf-sys.c
 fg
 File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
-)) [1
+))
+Overfull \hbox (234.04274pt too wide) in paragraph at lines 40--41
+\OT1/cmr/m/n/10 This sec-tion doc-u-ments, in full, the iden-ti-fi-ca-tion meth
+od im-ple-mented in \OT1/cmtt/m/n/10 ViscoElasticity[]tensor[]3D/NonLinear[]3D/
+fit[]nonlinear[]deviatoric[]sindy.py\OT1/cmr/m/n/10 .
+ []
 
-{C:/Users/emanu/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/eman
-u/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
-Overfull \hbox (29.56425pt too wide) in paragraph at lines 68--77
+[1
+
+{C:/Users/emanu/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
+Overfull \hbox (9.37186pt too wide) in paragraph at lines 57--58
+[]\OT1/cmr/bx/n/10 Shear-component model\OT1/cmr/m/n/10 : fit on $\OML/cmm/m/it
+/10 S[]$ \OT1/cmr/m/n/10 from the shear train-ing tra-jec-tory, us-ing fea-ture
+s $[[]\OML/cmm/m/it/10 ;  S[]^^[[]\OT1/cmr/m/n/10 ]$
+ []
+
+[2{C:/Users/emanu/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/cm-super/cm-sup
+er-ts1.enc}]
+
+LaTeX Warning: Reference `sec:methodology' on page 3 undefined on input line 92
+.
+
+
+Overfull \hbox (29.56425pt too wide) in paragraph at lines 106--115
  [][] 
  []
 
-<nonlinear_deviatoric_comparison.png, id=17, 867.24pt x 722.7pt>
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<nonlinear_deviatoric_comparison.png, id=22, 867.24pt x 722.7pt>
 File: nonlinear_deviatoric_comparison.png Graphic file (type png)
 <use nonlinear_deviatoric_comparison.png>
 Package pdftex.def Info: nonlinear_deviatoric_comparison.png  used on input lin
-e 101.
+e 139.
 (pdftex.def)             Requested size: 452.9679pt x 377.47131pt.
-
-Overfull \hbox (56.8941pt too wide) in paragraph at lines 109--110
+[3] [4 <./nonlinear_deviatoric_comparison.png>]
+Overfull \hbox (56.8941pt too wide) in paragraph at lines 148--149
 []\OT1/cmr/m/it/10 The stan-dalone 1D Python script is hard-coded in a mis-lead
 -ing way. In MAIN-CODE[]simple[]visco[]sindy.py,
  []
 
-[2] [3 <./nonlinear_deviatoric_comparison.png>]
-Overfull \hbox (1.72885pt too wide) in paragraph at lines 114--115
+
+Overfull \hbox (1.72885pt too wide) in paragraph at lines 153--154
 \OT1/cmr/m/n/10 loudly with the of-fend-ing co-ef-fi-cients printed, in-stead o
 f silently trun-cat-ing them in \OT1/cmtt/m/n/10 discovered[]ode\OT1/cmr/m/n/10
  . 
  []
 
 
-Overfull \hbox (43.13698pt too wide) in paragraph at lines 115--116
+Overfull \hbox (43.13698pt too wide) in paragraph at lines 154--155
 []\OT1/cmr/bx/n/10 Library no longer re-stricted to the an-swer\OT1/cmr/m/n/10 
 : The script pre-vi-ously used \OT1/cmtt/m/n/10 PolynomialLibrary(degree=1)\OT1
 /cmr/m/n/10 ,
  []
 
 
-Overfull \hbox (42.99443pt too wide) in paragraph at lines 115--116
+Overfull \hbox (42.99443pt too wide) in paragraph at lines 154--155
 \OT1/cmr/m/n/10 raised about thresh-old tun-ing, just moved to the li-brary. Th
 e script now uses \OT1/cmtt/m/n/10 PolynomialLibrary(degree=3)
  []
 
-
-Overfull \hbox (0.78949pt too wide) in paragraph at lines 121--122
+[5]
+Overfull \hbox (0.78949pt too wide) in paragraph at lines 160--161
 []\OT1/cmr/m/n/10 Plastic (Voce--Perzyna) iden-ti-fi-ca-tion $\OMS/cmsy/m/n/10 
 !$ \OT1/cmtt/m/n/10 Emanuele/Data[]driven[]3D[]single[]load.ipynb\OT1/cmr/m/n/1
 0 , SR3
  []
 
-[4] (results.aux)
+LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <12> not available
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 165.
+<../figures/1D/01_training_inputs_rich_signal.png, id=34, 505.89pt x 361.35pt>
+File: ../figures/1D/01_training_inputs_rich_signal.png Graphic file (type png)
+<use ../figures/1D/01_training_inputs_rich_signal.png>
+Package pdftex.def Info: ../figures/1D/01_training_inputs_rich_signal.png  used
+ on input line 170.
+(pdftex.def)             Requested size: 339.72592pt x 242.66565pt.
+<../figures/1D/02_training_outputs_reconstruction.png, id=35, 505.89pt x 361.35
+pt>
+File: ../figures/1D/02_training_outputs_reconstruction.png Graphic file (type p
+ng)
+<use ../figures/1D/02_training_outputs_reconstruction.png>
+Package pdftex.def Info: ../figures/1D/02_training_outputs_reconstruction.png  
+used on input line 176.
+(pdftex.def)             Requested size: 339.72592pt x 242.66565pt.
+<../figures/1D/03_training_stress_strain.png, id=36, 505.89pt x 361.35pt>
+File: ../figures/1D/03_training_stress_strain.png Graphic file (type png)
+<use ../figures/1D/03_training_stress_strain.png>
+Package pdftex.def Info: ../figures/1D/03_training_stress_strain.png  used on i
+nput line 182.
+(pdftex.def)             Requested size: 339.72592pt x 242.66565pt.
+<../figures/1D/04_validation_inputs_unseen_signal.png, id=37, 505.89pt x 361.35
+pt>
+File: ../figures/1D/04_validation_inputs_unseen_signal.png Graphic file (type p
+ng)
+<use ../figures/1D/04_validation_inputs_unseen_signal.png>
+Package pdftex.def Info: ../figures/1D/04_validation_inputs_unseen_signal.png  
+used on input line 188.
+(pdftex.def)             Requested size: 339.72592pt x 242.66565pt.
+<../figures/1D/05_validation_outputs_generalization.png, id=38, 505.89pt x 361.
+35pt>
+File: ../figures/1D/05_validation_outputs_generalization.png Graphic file (type
+ png)
+<use ../figures/1D/05_validation_outputs_generalization.png>
+Package pdftex.def Info: ../figures/1D/05_validation_outputs_generalization.png
+  used on input line 194.
+(pdftex.def)             Requested size: 339.72592pt x 242.66565pt.
+<../figures/1D/06_validation_stress_strain.png, id=39, 505.89pt x 361.35pt>
+File: ../figures/1D/06_validation_stress_strain.png Graphic file (type png)
+<use ../figures/1D/06_validation_stress_strain.png>
+Package pdftex.def Info: ../figures/1D/06_validation_stress_strain.png  used on
+ input line 200.
+(pdftex.def)             Requested size: 339.72592pt x 242.66565pt.
+<../figures/1D/07_threshold_sensitivity_sweep_degree3_library.png, id=40, 650.4
+3pt x 433.62pt>
+File: ../figures/1D/07_threshold_sensitivity_sweep_degree3_library.png Graphic 
+file (type png)
+<use ../figures/1D/07_threshold_sensitivity_sweep_degree3_library.png>
+Package pdftex.def Info: ../figures/1D/07_threshold_sensitivity_sweep_degree3_l
+ibrary.png  used on input line 206.
+(pdftex.def)             Requested size: 407.66833pt x 271.78596pt.
+
+Overfull \hbox (216.74156pt too wide) in paragraph at lines 210--210
+[]\OT1/cmr/bx/n/12 3D De-vi-a-toric Val-i-da-tion Fig-ures (\OT1/cmtt/m/n/12 Vi
+scoElasticity[]tensor[]3D/NonLinear[]3D/fit[]nonlinear[]deviatoric[]sindy.py\OT
+1/cmr/bx/n/12 ) 
+ []
+
+<../figures/3D/01_combined_Sxx_rmse0.0193.png, id=41, 505.89pt x 361.35pt>
+File: ../figures/3D/01_combined_Sxx_rmse0.0193.png Graphic file (type png)
+<use ../figures/3D/01_combined_Sxx_rmse0.0193.png>
+Package pdftex.def Info: ../figures/3D/01_combined_Sxx_rmse0.0193.png  used on 
+input line 216.
+(pdftex.def)             Requested size: 339.72592pt x 242.66565pt.
+<../figures/3D/02_combined_Sxy_rmse0.0054.png, id=42, 505.89pt x 361.35pt>
+File: ../figures/3D/02_combined_Sxy_rmse0.0054.png Graphic file (type png)
+<use ../figures/3D/02_combined_Sxy_rmse0.0054.png>
+Package pdftex.def Info: ../figures/3D/02_combined_Sxy_rmse0.0054.png  used on 
+input line 222.
+(pdftex.def)             Requested size: 339.72592pt x 242.66565pt.
+<../figures/3D/03_biaxial_Sxx_rmse0.0145.png, id=43, 505.89pt x 361.35pt>
+File: ../figures/3D/03_biaxial_Sxx_rmse0.0145.png Graphic file (type png)
+<use ../figures/3D/03_biaxial_Sxx_rmse0.0145.png>
+Package pdftex.def Info: ../figures/3D/03_biaxial_Sxx_rmse0.0145.png  used on i
+nput line 228.
+(pdftex.def)             Requested size: 339.72592pt x 242.66565pt.
+<../figures/3D/04_biaxial_Syy_rmse0.0126.png, id=44, 505.89pt x 361.35pt>
+File: ../figures/3D/04_biaxial_Syy_rmse0.0126.png Graphic file (type png)
+<use ../figures/3D/04_biaxial_Syy_rmse0.0126.png>
+Package pdftex.def Info: ../figures/3D/04_biaxial_Syy_rmse0.0126.png  used on i
+nput line 234.
+(pdftex.def)             Requested size: 339.72592pt x 242.66565pt.
+[6 <../figures/1D/01_training_inputs_rich_signal.png>] [7 <../figures/1D/02_tra
+ining_outputs_reconstruction.png> <../figures/1D/03_training_stress_strain.png>
+] [8 <../figures/1D/04_validation_inputs_unseen_signal.png> <../figures/1D/05_v
+alidation_outputs_generalization.png>] [9 <../figures/1D/06_validation_stress_s
+train.png> <../figures/1D/07_threshold_sensitivity_sweep_degree3_library.png>]
+[10 <../figures/3D/01_combined_Sxx_rmse0.0193.png> <../figures/3D/02_combined_S
+xy_rmse0.0054.png>] [11 <../figures/3D/03_biaxial_Sxx_rmse0.0145.png> <../figur
+es/3D/04_biaxial_Syy_rmse0.0126.png>] (results.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-24>
  ***********
+
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
  ) 
 Here is how much of TeX's memory you used:
- 2684 strings out of 467871
- 41581 string characters out of 5418376
- 465027 words of memory out of 5000000
- 31560 multiletter control sequences out of 15000+600000
- 633982 words of font info for 63 fonts, out of 8000000 for 9000
+ 2796 strings out of 467871
+ 46925 string characters out of 5418376
+ 464120 words of memory out of 5000000
+ 31669 multiletter control sequences out of 15000+600000
+ 635077 words of font info for 67 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 57i,10n,65p,1522b,252s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 57i,10n,65p,1522b,251s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/emanu/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/
 cmbx10.pfb><C:/Users/emanu/AppData/Local/Programs/MiKTeX/fonts/type1/public/ams
 fonts/cm/cmbx12.pfb><C:/Users/emanu/AppData/Local/Programs/MiKTeX/fonts/type1/p
@@ -316,10 +435,11 @@ ppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users
 s/cm/cmsy7.pfb><C:/Users/emanu/AppData/Local/Programs/MiKTeX/fonts/type1/public
 /amsfonts/cm/cmti10.pfb><C:/Users/emanu/AppData/Local/Programs/MiKTeX/fonts/typ
 e1/public/amsfonts/cm/cmtt10.pfb><C:/Users/emanu/AppData/Local/Programs/MiKTeX/
-fonts/type1/public/cm-super/sfrm1000.pfb>
-Output written on results.pdf (4 pages, 471020 bytes).
+fonts/type1/public/amsfonts/cm/cmtt12.pfb><C:/Users/emanu/AppData/Local/Program
+s/MiKTeX/fonts/type1/public/cm-super/sfrm1000.pfb>
+Output written on results.pdf (11 pages, 1461383 bytes).
 PDF statistics:
- 89 PDF objects out of 1000 (max. 8388607)
+ 139 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 6 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 61 words of extra memory for PDF output out of 10000 (max. 10000000)
 

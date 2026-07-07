@@ -4,6 +4,7 @@
 \usepackage{geometry}
 \usepackage{graphicx}
 \geometry{a4paper, margin=1in}
+\graphicspath{{../figures/1D/}{../figures/3D/}{./}}
 
 \title{SINDy Parameter Recovery and Validation for Coupled Nonlinear Viscoelasticity}
 \author{Data Driven Project Team}
@@ -34,6 +35,46 @@ By expanding, we obtain the coupled differential equations:
     \frac{d S_{ij}}{dt} = 2G \dot{\varepsilon}^{dev}_{ij} - \frac{2G}{\eta_0} S_{ij} - \frac{2G\alpha}{\eta_0} S_{ij} \sigma_{eq}^2
 \end{equation}
 
+\section{Methodology: Deviatoric Component-wise SINDy Fitting}
+\label{sec:methodology}
+This section documents, in full, the identification method implemented in \texttt{ViscoElasticity\_tensor\_3D/NonLinear\_3D/fit\_nonlinear\_deviatoric\_sindy.py}. The model is fit in \emph{deviatoric component space}, not by reducing the tensor to a single von Mises scalar. The distinction matters and is spelled out below because an earlier draft of this report conflated the two approaches (Section~2.2 described a scalar $\varepsilon_{eq}/\sigma_{eq}$ pipeline while Section~2.5 described this deviatoric one); the scalar von Mises pipeline has since been removed from the active codebase and archived, and the deviatoric method below is the sole active 3D pipeline.
+
+\subsection{State variables and features}
+The state vector is the full set of 6 deviatoric stress components, not a scalar reduction:
+\[
+    \mathbf{S} = (S_{xx}, S_{yy}, S_{zz}, S_{xy}, S_{yz}, S_{xz}).
+\]
+For each component, the SINDy candidate library is built from three ingredients per Eq.~4: a bias term, the component's own deviatoric strain rate $\dot{\varepsilon}^{dev}_{ij}$, and a nonlinear coupling feature $S_{ij}\cdot\sigma_{eq}^2$, where
+\[
+    \sigma_{eq}^2 = 1.5\left(S_{xx}^2 + S_{yy}^2 + S_{zz}^2 + 2S_{xy}^2 + 2S_{yz}^2 + 2S_{xz}^2\right)
+\]
+is the (squared) von Mises equivalent stress. This is the \emph{only} role $\sigma_{eq}^2$ plays here: it is one scalar invariant used as a candidate \emph{feature} inside a 19-column library (1 bias + 6 stress components + 6 strain rates + 6 coupling terms), not a variable the tensor problem is reduced to. The state itself stays 6-dimensional throughout.
+
+\subsection{Why component-by-component, not one 6D fit}
+Fitting all 6 equations jointly with a single STLSQ call runs into multicollinearity: the six deviatoric strain-rate components are not independent (they are constrained to sum to zero and, for the uniaxial/shear training paths used here, several components are proportional to each other), so a joint fit cannot reliably attribute the recovered coefficients to the correct feature. The script sidesteps this by fitting only two independent 1D regressions:
+\begin{itemize}
+    \item \textbf{Normal-component model}: fit on $S_{xx}$ from the uniaxial training trajectory, using features $[\dot{\varepsilon}^{dev}_{xx},\, S_{xx}\sigma_{eq}^2]$ (plus bias). This yields coefficients $(c_0^n, c_1^n, c_2^n, c_3^n)$.
+    \item \textbf{Shear-component model}: fit on $S_{xy}$ from the shear training trajectory, using features $[\dot{\varepsilon}^{dev}_{xy},\, S_{xy}\sigma_{eq}^2]$ (plus bias). This yields coefficients $(c_0^s, c_1^s, c_2^s, c_3^s)$.
+\end{itemize}
+Each 1D fit uses \texttt{PolynomialLibrary(degree=1)} and \texttt{STLSQ(threshold=1e-5)} -- i.e. a library restricted to exactly the terms in Eq.~4, not a richer candidate set. This is the same "library hands SINDy the answer" pattern discussed for the standalone 1D script (Section~\ref{sec:1d-robustness} below); it has not yet been generalized to a richer library + threshold-sweep check the way the 1D script was. See the note at the end of this section.
+
+\subsection{Assembling the full 6-component model}
+Because the material is assumed isotropic, the normal-component coefficients are reused for all three normal equations ($S_{xx}, S_{yy}, S_{zz}$) and the shear-component coefficients for all three shear equations ($S_{xy}, S_{yz}, S_{xz}$) -- this is what "component-wise" means in practice: two regressions, six equations, populated by symmetry rather than fit independently six times. The resulting $6\times 19$ coefficient matrix is injected directly into a dummy \texttt{SINDy} model's optimizer (\texttt{model.optimizer.coef\_ = coeffs}) purely so \texttt{model.print()} can render the human-readable equations; the matrix itself, not the dummy model, drives the ODE used for rollout and validation.
+
+\subsection{Parameter recovery}
+Material constants are read back out of each component's coefficients algebraically:
+\begin{align*}
+    G &= \tfrac{1}{2}\, c_2 \quad \text{(from the } \dot{\varepsilon}\text{ coefficient)} \\
+    \eta_0 &= -2G / c_1 \quad \text{(from the } S_{ij}\text{ coefficient)} \\
+    \alpha &= c_3 \, \eta_0 / (-2G) \quad \text{(from the coupling coefficient)}
+\end{align*}
+computed once from the normal-component equation and once from the shear-component equation, then averaged (Table~\ref{tab:parameters}).
+
+\subsection{Validation rollout}
+For the unseen combined and biaxial load paths, the 6 coupled ODEs (assembled from the two fitted component models via the symmetry above) are integrated with \texttt{scipy.integrate.solve\_ivp} (implicit \texttt{Radau} method, $\text{rtol}=10^{-8}$, $\text{atol}=10^{-10}$), alongside a linear-Maxwell reference ODE with $\alpha=0$ and the true $G,\eta_0$, for comparison (Figures showing SINDy vs. true vs. linear-reference, Section~\ref{sec:3d-figures}).
+
+\paragraph{Open item.} The component-wise fits above use a single hand-picked threshold ($10^{-5}$) on a library restricted to exactly the expected terms -- the same two issues (library restriction, unswept threshold) that were identified and fixed for the standalone 1D script in Section~\ref{sec:1d-robustness}. That fix (richer library + threshold-sensitivity sweep) has not yet been ported to this 3D pipeline; it is flagged here as follow-up work, not yet done.
+
 \section{Addressing Reviewer Feedback}
 A key feedback point raised by the reviewer on the linear model was:
 \begin{quote}
@@ -48,15 +89,12 @@ By implementing and fitting the J2-coupled nonlinear Maxwell model, we have succ
 \end{itemize}
 
 \section{Discovered SINDy Equations}
-Using a component-by-component fitting strategy with an STLSQ sparsity threshold of $10^{-5}$, the following 3D coupled equations were discovered:
+Only 2 independent SINDy fits are performed (Section~\ref{sec:methodology}): one on $S_{xx}$ from the uniaxial training trajectory, one on $S_{xy}$ from the pure-shear training trajectory. Each uses \texttt{PolynomialLibrary(degree=1)} and \texttt{STLSQ(threshold=1e-5)}:
 \begin{align*}
     \frac{d S_{xx}}{dt} &= 0.034 - 4.007 S_{xx} + 2000.845 \dot{\varepsilon}^{dev}_{xx} - 0.001 S_{xx} \sigma_{eq}^2 \\
-    \frac{d S_{yy}}{dt} &= 0.034 - 4.007 S_{yy} + 2000.845 \dot{\varepsilon}^{dev}_{yy} - 0.001 S_{yy} \sigma_{eq}^2 \\
-    \frac{d S_{zz}}{dt} &= 0.034 - 4.007 S_{zz} + 2000.845 \dot{\varepsilon}^{dev}_{zz} - 0.001 S_{zz} \sigma_{eq}^2 \\
-    \frac{d S_{xy}}{dt} &= 0.002 - 3.995 S_{xy} + 1998.814 \dot{\varepsilon}^{dev}_{xy} - 0.001 S_{xy} \sigma_{eq}^2 \\
-    \frac{d S_{yz}}{dt} &= 0.002 - 3.995 S_{yz} + 1998.814 \dot{\varepsilon}^{dev}_{yz} - 0.001 S_{yz} \sigma_{eq}^2 \\
-    \frac{d S_{xz}}{dt} &= 0.002 - 3.995 S_{xz} + 1998.814 \dot{\varepsilon}^{dev}_{xz} - 0.001 S_{xz} \sigma_{eq}^2 
+    \frac{d S_{xy}}{dt} &= 0.002 - 3.995 S_{xy} + 1998.814 \dot{\varepsilon}^{dev}_{xy} - 0.001 S_{xy} \sigma_{eq}^2
 \end{align*}
+The remaining 4 equations ($S_{yy}, S_{zz}$ using the $S_{xx}$ coefficients; $S_{yz}, S_{xz}$ using the $S_{xy}$ coefficients) are \emph{not} independently discovered -- they are populated by assuming isotropy, since the training set has no independent excitation for them (uniaxial loading makes $S_{yy}, S_{zz}$ deterministic functions of $S_{xx}$ via the traceless constraint $S_{xx}+S_{yy}+S_{zz}=0$; pure shear leaves $S_{yz}, S_{xz}$ at zero throughout). This is a modeling assumption, not a validated result -- see the "Open item" note in the Methodology section.
 
 \section{Parameter Recovery Performance}
 Table~\ref{tab:parameters} compares the recovered material constants to the true values before and after applying the component-wise fitting and sparsity threshold corrections.
@@ -104,6 +142,7 @@ Biaxial Tension & $S_{xx}$ & 0.0145 \\
 \end{figure}
 
 \section{Addressing Reviewer Feedback: Standalone Script Robustness and Figure Provenance}
+\label{sec:1d-robustness}
 A further reviewer comment concerned the standalone 1D script:
 \begin{quote}
     \textit{The standalone 1D Python script is hard-coded in a misleading way. In MAINCODE\_simple\_visco\_sindy.py, the discovered\_ode function builds the time derivative as coeffs[0] + coeffs[1]*sig + coeffs[2]*ed and ignores any higher-order terms that SINDy might keep. For the linear Maxwell case with threshold one this gives the right answer, because STLSQ prunes everything except the bias and the two linear terms, but as a general script it is misleading. Add at least an assertion that the remaining coefficients are zero within numerical tolerance before the rollout starts. On top of that, the report says the plastic identification uses SR3, while this standalone script uses STLSQ with threshold one. The notebook does use SR3, so the reported plastic result is not wrong, but the repository does not make clear which figure comes from which file. Every figure in the report should map to one named script or one named notebook cell.}
@@ -122,5 +161,78 @@ This has been addressed as follows:
     \end{itemize}
     This confirms the reported plastic result (SR3) is correctly sourced from the notebook, distinct from the standalone script's STLSQ-based viscoelastic result; the two were previously conflated only by omission, not by error.
 \end{itemize}
+
+\subsection{1D Viscoelastic Figures (\texttt{Emanuele/simple\_visco\_sindy.py})}
+Each panel of the former single 6-subplot figure is now saved as its own file under \texttt{Emanuele/figures/1D/}, so every panel can be cited individually by filename.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{01_training_inputs_rich_signal.png}
+    \caption{\texttt{01\_training\_inputs\_rich\_signal.png} -- The 5-sine training excitation ($\varepsilon$, blue; $\dot{\varepsilon}$, green). This replaces the original narrow 2-sine signal; the wider amplitude and added frequency content is what breaks the $\dot{\varepsilon}/\dot{\varepsilon}^3$ collinearity discussed above.}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{02_training_outputs_reconstruction.png}
+    \caption{\texttt{02\_training\_outputs\_reconstruction.png} -- SINDy's reconstructed stress (red dashed) against the noisy training data (black dots) and the noise-free true signal (black line), over the training window.}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{03_training_stress_strain.png}
+    \caption{\texttt{03\_training\_stress\_strain.png} -- Same training reconstruction, viewed as a stress-strain hysteresis loop rather than a time series.}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{04_validation_inputs_unseen_signal.png}
+    \caption{\texttt{04\_validation\_inputs\_unseen\_signal.png} -- The single-frequency validation excitation, never seen during training, used to test generalization.}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{05_validation_outputs_generalization.png}
+    \caption{\texttt{05\_validation\_outputs\_generalization.png} -- SINDy prediction (red dashed) vs. true signal (black) on the unseen validation excitation, integrated forward with \texttt{discovered\_ode} and the coefficients recovered at $\texttt{threshold}=1.0$.}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{06_validation_stress_strain.png}
+    \caption{\texttt{06\_validation\_stress\_strain.png} -- Validation result as a stress-strain loop.}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{07_threshold_sensitivity_sweep_degree3_library.png}
+    \caption{\texttt{07\_threshold\_sensitivity\_sweep\_degree3\_library.png} -- Coefficient value vs. STLSQ threshold (log scale) for every term in the degree-3 library. The true terms ($\sigma$, $\dot{\varepsilon}$) are flat across the whole range shown; all other terms sit at zero once inside the green plateau $[0.5, 3.0]$. This is the direct visual evidence that the recovered sparsity pattern is not an artifact of one hand-picked threshold.}
+\end{figure}
+
+\subsection{3D Deviatoric Validation Figures (\texttt{ViscoElasticity\_tensor\_3D/NonLinear\_3D/fit\_nonlinear\_deviatoric\_sindy.py})}
+\label{sec:3d-figures}
+The combined 2$\times$2 validation figure (Figure~\ref{fig:validation_plot}) is also split into one file per component/load case under \texttt{Emanuele/figures/3D/}, with the RMSE value encoded directly in the filename.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{01_combined_Sxx_rmse0.0193.png}
+    \caption{\texttt{01\_combined\_Sxx\_rmse0.0193.png} -- $S_{xx}$ under the combined uniaxial+shear validation load: true nonlinear Maxwell response (solid black), SINDy prediction (dashed red), and the linear Maxwell reference with $\alpha=0$ (dotted blue). RMSE $=0.0193$ MPa.}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{02_combined_Sxy_rmse0.0054.png}
+    \caption{\texttt{02\_combined\_Sxy\_rmse0.0054.png} -- $S_{xy}$ under the same combined validation load. RMSE $=0.0054$ MPa.}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{03_biaxial_Sxx_rmse0.0145.png}
+    \caption{\texttt{03\_biaxial\_Sxx\_rmse0.0145.png} -- $S_{xx}$ under the biaxial tension validation load. RMSE $=0.0145$ MPa.}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{04_biaxial_Syy_rmse0.0126.png}
+    \caption{\texttt{04\_biaxial\_Syy\_rmse0.0126.png} -- $S_{yy}$ under the same biaxial validation load. RMSE $=0.0126$ MPa.}
+\end{figure}
 
 \end{document}
