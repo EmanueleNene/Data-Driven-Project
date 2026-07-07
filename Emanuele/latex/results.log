@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.2.26)  26 JUN 2026 14:52
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.2.26)  7 JUL 2026 17:50
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -254,20 +254,53 @@ File: nonlinear_deviatoric_comparison.png Graphic file (type png)
 Package pdftex.def Info: nonlinear_deviatoric_comparison.png  used on input lin
 e 101.
 (pdftex.def)             Requested size: 452.9679pt x 377.47131pt.
-[2] [3 <./nonlinear_deviatoric_comparison.png>] (results.aux)
+
+Overfull \hbox (56.8941pt too wide) in paragraph at lines 109--110
+[]\OT1/cmr/m/it/10 The stan-dalone 1D Python script is hard-coded in a mis-lead
+-ing way. In MAIN-CODE[]simple[]visco[]sindy.py,
+ []
+
+[2] [3 <./nonlinear_deviatoric_comparison.png>]
+Overfull \hbox (1.72885pt too wide) in paragraph at lines 114--115
+\OT1/cmr/m/n/10 loudly with the of-fend-ing co-ef-fi-cients printed, in-stead o
+f silently trun-cat-ing them in \OT1/cmtt/m/n/10 discovered[]ode\OT1/cmr/m/n/10
+ . 
+ []
+
+
+Overfull \hbox (43.13698pt too wide) in paragraph at lines 115--116
+[]\OT1/cmr/bx/n/10 Library no longer re-stricted to the an-swer\OT1/cmr/m/n/10 
+: The script pre-vi-ously used \OT1/cmtt/m/n/10 PolynomialLibrary(degree=1)\OT1
+/cmr/m/n/10 ,
+ []
+
+
+Overfull \hbox (42.99443pt too wide) in paragraph at lines 115--116
+\OT1/cmr/m/n/10 raised about thresh-old tun-ing, just moved to the li-brary. Th
+e script now uses \OT1/cmtt/m/n/10 PolynomialLibrary(degree=3)
+ []
+
+
+Overfull \hbox (0.78949pt too wide) in paragraph at lines 121--122
+[]\OT1/cmr/m/n/10 Plastic (Voce--Perzyna) iden-ti-fi-ca-tion $\OMS/cmsy/m/n/10 
+!$ \OT1/cmtt/m/n/10 Emanuele/Data[]driven[]3D[]single[]load.ipynb\OT1/cmr/m/n/1
+0 , SR3
+ []
+
+[4] (results.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-24>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 2677 strings out of 467871
- 41604 string characters out of 5418376
- 463027 words of memory out of 5000000
- 31555 multiletter control sequences out of 15000+600000
- 633478 words of font info for 60 fonts, out of 8000000 for 9000
+ 2684 strings out of 467871
+ 41581 string characters out of 5418376
+ 465027 words of memory out of 5000000
+ 31560 multiletter control sequences out of 15000+600000
+ 633982 words of font info for 63 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 57i,10n,65p,442b,252s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 57i,10n,65p,1522b,252s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/emanu/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/
 cmbx10.pfb><C:/Users/emanu/AppData/Local/Programs/MiKTeX/fonts/type1/public/ams
 fonts/cm/cmbx12.pfb><C:/Users/emanu/AppData/Local/Programs/MiKTeX/fonts/type1/p
@@ -282,10 +315,11 @@ ppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users
 10.pfb><C:/Users/emanu/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfont
 s/cm/cmsy7.pfb><C:/Users/emanu/AppData/Local/Programs/MiKTeX/fonts/type1/public
 /amsfonts/cm/cmti10.pfb><C:/Users/emanu/AppData/Local/Programs/MiKTeX/fonts/typ
-e1/public/cm-super/sfrm1000.pfb>
-Output written on results.pdf (3 pages, 435377 bytes).
+e1/public/amsfonts/cm/cmtt10.pfb><C:/Users/emanu/AppData/Local/Programs/MiKTeX/
+fonts/type1/public/cm-super/sfrm1000.pfb>
+Output written on results.pdf (4 pages, 471020 bytes).
 PDF statistics:
- 81 PDF objects out of 1000 (max. 8388607)
+ 89 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  6 words of extra memory for PDF output out of 10000 (max. 10000000)
 
