@@ -11,11 +11,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pysindy as ps
 import warnings
+import os
 try:
     from pysindy.utils.axes import AxesWarning
     warnings.filterwarnings("ignore", category=AxesWarning)
 except Exception:
     pass
+
+dir_path = os.path.dirname(os.path.abspath(__file__))
+fig_dir = os.path.join(dir_path, "figures", "plastic")
+os.makedirs(fig_dir, exist_ok=True)
 
 # ---------- true material (identical to 24d_vocePerzyna1D_finalPres.py) ----------
 E, sigy0, Q, b, eta_vp = 2000.0, 5.0, 12.0, 40.0, 20.0
@@ -92,5 +97,7 @@ plt.xlabel(r'plastic strain $\varepsilon_p$')
 plt.ylabel(r'hardening contribution to $\dot\varepsilon_p$  (1/s, sign-flipped)')
 plt.title('Hardening rate: exact vs Taylor vs SINDy (training range)')
 plt.legend(); plt.grid(True, alpha=0.3); plt.tight_layout()
-plt.savefig('voce_perzyna_hardening_residual.png', dpi=150)
-print("\nSaved: voce_perzyna_hardening_residual.png")
+fig_path = os.path.join(fig_dir, "04_hardening_residual.png")
+plt.savefig(fig_path, dpi=150)
+plt.close()
+print(f"\nSaved: {fig_path}")

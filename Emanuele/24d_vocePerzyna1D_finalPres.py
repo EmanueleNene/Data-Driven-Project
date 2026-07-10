@@ -2,8 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pysindy as ps
 import warnings
+import os
 from pysindy.utils.axes import AxesWarning
 warnings.filterwarnings("ignore", category=AxesWarning)
+
+dir_path = os.path.dirname(os.path.abspath(__file__))
+fig_dir = os.path.join(dir_path, "figures", "plastic")
+os.makedirs(fig_dir, exist_ok=True)
 
 # -----------------------------
 # True material (Voce + Perzyna)
@@ -143,18 +148,24 @@ plt.plot(eps_va, sig_va,  lw=2, label="True")
 plt.plot(eps_va, sig_hat, "--", lw=2, label="SINDy rollout")
 plt.gca().xaxis.set_major_locator(plt.MaxNLocator(5))
 plt.xlabel("ε"); plt.ylabel("σ (MPa)"); #plt.title("Validation: stress–strain")
-plt.legend(); plt.tight_layout(); plt.show()
+plt.legend(); plt.tight_layout()
+plt.savefig(os.path.join(fig_dir, "01_validation_stress_strain.png"), dpi=150)
+plt.close()
 
 plt.figure(figsize=(5,4))
 plt.grid(True, alpha=0.3)
 plt.plot(t, ep_va,  lw=2, label="True ep")
 plt.plot(t, ep_hat, "--", lw=2, label="SINDy ep")
 plt.xlabel("t (s)"); plt.ylabel("ep"); #plt.title("Validation: plastic strain")
-plt.legend(); plt.tight_layout(); plt.show()
+plt.legend(); plt.tight_layout()
+plt.savefig(os.path.join(fig_dir, "02_validation_plastic_strain_accumulation.png"), dpi=150)
+plt.close()
 
 plt.figure(figsize=(5,4))
 plt.grid(True, alpha=0.3)
 plt.plot(ep_va, sig_va,  lw=2, label="True hardening (σ vs ep)")
 plt.plot(ep_hat, sig_hat, "--", lw=2, label="SINDy hardening")
 plt.xlabel("ep"); plt.ylabel("σ"); #plt.title("Validation: hardening curve")
-plt.legend(); plt.tight_layout(); plt.show()
+plt.legend(); plt.tight_layout()
+plt.savefig(os.path.join(fig_dir, "03_validation_hardening_curve.png"), dpi=150)
+plt.close()
