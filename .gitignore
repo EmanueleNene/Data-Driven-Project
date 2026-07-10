@@ -1,0 +1,7 @@
+# LaTeX build cache (latexmk)
+Emanuele/latex/*.fdb_latexmk
+Emanuele/latex/*.fls
+Emanuele/latex/*.synctex.gz
+
+# stray leftover output (wrong-dir run of 25_voce_perzyna_residual.py)
+Emanuele/voce_perzyna_hardening_residual.png
