@@ -85,24 +85,100 @@ U_train = [U_uni, U_shr]
 # ==========================================
 # 3. COMPONENT-BY-COMPONENT SINDY FITTING
 # ==========================================
-# To bypass collinearity, fit 1D models for normal (S_xx) and shear (S_xy) components
-# Use a small threshold (1e-5) to retain the non-linear coupling term (coeff ~ -0.0006)
-poly_lib_1d = ps.PolynomialLibrary(degree=1, include_bias=True)
-opt_1d = ps.STLSQ(threshold=1e-5)
+# Degree-3 library on [S, ed, Seq] (20 terms incl. bias) -- NOT restricted to the
+# expected {bias, S, ed, Seq} terms. A degree-3 fit here is ill-conditioned for two
+# independent reasons (see results.tex, Section "Training and validation loading
+# paths" and "Open item"):
+#   (1) a pure single-axis training path forces sigma_eq^2 to be an exact cubic
+#       function of the fitted component alone, making the Seq feature perfectly
+#       collinear with the S^3 library term -- fixed by training on a genuinely
+#       biaxial path (see generate_nonlinear_deviatoric_data.py).
+#   (2) the true coefficients span ~6 orders of magnitude (ed ~ 2000, S ~ -4,
+#       Seq ~ -0.0006), so a single global STLSQ threshold on raw (unscaled)
+#       library columns cannot separate the tiny-but-real Seq term from mid-size
+#       spurious cross terms -- fixed by rescaling every column to unit std before
+#       thresholding, then un-scaling the surviving coefficients back to physical
+#       units (rescale -> prune -> unscale).
+LIB_TERM_NAMES = ["1", "S", "ed", "Seq", "S^2", "S ed", "S Seq", "ed^2", "ed Seq", "Seq^2",
+                  "S^3", "S^2 ed", "S^2 Seq", "S ed^2", "S ed Seq", "S Seq^2",
+                  "ed^3", "ed^2 Seq", "ed Seq^2", "Seq^3"]
+EXPECTED_TERMS = {"1", "S", "ed", "Seq"}
+SWEEP_THRESHOLDS = [1e-3, 1e-2, 0.05, 0.1, 0.3, 0.5, 1.0, 2.0, 5.0]
+STABLE_THRESHOLD = 5.0  # mid/end of the plateau confirmed by the sweep below
 
-# Fit S_xx model (using uniaxial loading data)
-X_xx = X_uni[:, 0].reshape(-1, 1)
-U_xx = np.column_stack([U_uni[:, 0], U_uni[:, 6]]) # [ed_xx, Seq_xx]
-model_xx = ps.SINDy(feature_library=poly_lib_1d, optimizer=opt_1d)
-model_xx.fit(X_xx, u=U_xx, t=dt)
-coeffs_normal = model_xx.coefficients()[0]
 
-# Fit S_xy model (using shear loading data)
-X_xy = X_shr[:, 3].reshape(-1, 1)
-U_xy = np.column_stack([U_shr[:, 3], U_shr[:, 9]]) # [ed_xy, Seq_xy]
-model_xy = ps.SINDy(feature_library=poly_lib_1d, optimizer=opt_1d)
-model_xy.fit(X_xy, u=U_xy, t=dt)
-coeffs_shear = model_xy.coefficients()[0]
+def build_degree3_library(S, ed, Seq):
+    """Degree-3 polynomial library over the 3 raw features [S, ed, Seq]."""
+    return np.column_stack([
+        np.ones_like(S), S, ed, Seq,
+        S**2, S*ed, S*Seq, ed**2, ed*Seq, Seq**2,
+        S**3, S**2*ed, S**2*Seq, S*ed**2, S*ed*Seq, S*Seq**2,
+        ed**3, ed**2*Seq, ed*Seq**2, Seq**3,
+    ])
+
+
+def stlsq(Theta, y, threshold, n_iter=20):
+    """Plain sequential-thresholded least squares (STLSQ)."""
+    coef, *_ = np.linalg.lstsq(Theta, y, rcond=None)
+    for _ in range(n_iter):
+        small = np.abs(coef) < threshold
+        coef[small] = 0.0
+        keep = ~small
+        if not keep.any():
+            break
+        coef[keep], *_ = np.linalg.lstsq(Theta[:, keep], y, rcond=None)
+    return coef
+
+
+def fit_component_degree3(S, ed, Seq, dt, label):
+    """Rescale -> STLSQ prune -> unscale fit of one deviatoric component.
+
+    Runs the full threshold sweep for the stability check (printed for the report),
+    then returns the (c0, c1_S, c2_ed, c3_Seq) coefficients at STABLE_THRESHOLD and
+    asserts every higher-order library term is zero within tolerance -- the same
+    "don't silently truncate" safety check used in Emanuele/simple_visco_sindy.py.
+    """
+    Theta = build_degree3_library(S, ed, Seq)
+    dXdt = np.gradient(S, dt)
+
+    scales = Theta.std(axis=0)
+    scales[scales == 0] = 1.0
+    Theta_scaled = Theta / scales
+
+    print(f"\n--- Threshold sweep, degree-3 library, component: {label} ---")
+    sweep_results = []
+    for thr in SWEEP_THRESHOLDS:
+        coef_scaled = stlsq(Theta_scaled, dXdt, thr)
+        coef_phys = coef_scaled / scales
+        nz = [(n, c) for n, c in zip(LIB_TERM_NAMES, coef_phys) if abs(c) > 1e-12]
+        sweep_results.append((thr, coef_phys.copy()))
+        print(f"  threshold={thr:<6} nnz={len(nz):2d}  " + ", ".join(f"{n}={c:.5g}" for n, c in nz))
+
+    final_scaled = stlsq(Theta_scaled, dXdt, STABLE_THRESHOLD)
+    final_coef = final_scaled / scales
+    surviving = {n for n, c in zip(LIB_TERM_NAMES, final_coef) if abs(c) > 1e-12}
+    spurious = surviving - EXPECTED_TERMS
+    assert not spurious, (
+        f"{label}: degree-3 fit kept unexpected terms at threshold={STABLE_THRESHOLD}: {spurious}. "
+        "Library/threshold no longer isolates the true {bias, S, ed, Seq} model -- do not "
+        "silently drop them, investigate before using these coefficients."
+    )
+
+    idx = {n: i for i, n in enumerate(LIB_TERM_NAMES)}
+    c0 = final_coef[idx["1"]]
+    c1 = final_coef[idx["S"]]
+    c2 = final_coef[idx["ed"]]
+    c3 = final_coef[idx["Seq"]]
+    return np.array([c0, c1, c2, c3]), sweep_results
+
+
+# Fit S_xx model (using biaxial-normal training data)
+coeffs_normal, sweep_normal = fit_component_degree3(
+    X_uni[:, 0], U_uni[:, 0], U_uni[:, 6], dt, "S_xx (biaxial-normal training)")
+
+# Fit S_xy model (using biaxial-shear training data)
+coeffs_shear, sweep_shear = fit_component_degree3(
+    X_shr[:, 3], U_shr[:, 3], U_shr[:, 9], dt, "S_xy (biaxial-shear training)")
 
 # ==========================================
 # 4. CONSTRUCT FULL 6x19 COEFFICIENT MATRIX
@@ -363,6 +439,28 @@ for fname, time_arr, true_arr, sindy_arr, lin_arr in panels:
     plt.savefig(out_path, dpi=150)
     plt.close()
     print(f"Saved {out_path}")
+
+# --- Threshold-sensitivity sweep plot: degree-3 library, rescale-prune-unscale coefficients ---
+fig, axs = plt.subplots(1, 2, figsize=(13, 5))
+for ax, (sweep, label) in zip(axs, [(sweep_normal, "S_xx (normal)"), (sweep_shear, "S_xy (shear)")]):
+    thr_arr = [thr for thr, _ in sweep]
+    for term in ["S", "ed", "Seq"]:
+        j = LIB_TERM_NAMES.index(term)
+        vals = [coef[j] for _, coef in sweep]
+        ax.plot(thr_arr, vals, marker='o', label=term)
+    ax.axvspan(1.0, 5.0, color='green', alpha=0.15, label='stable plateau')
+    ax.set_xscale('log')
+    ax.set_yscale('symlog', linthresh=1e-3)
+    ax.set_xlabel("STLSQ threshold (rescaled space)")
+    ax.set_ylabel("Coefficient (physical units)")
+    ax.set_title(f"Threshold sweep -- {label}")
+    ax.grid(True, alpha=0.3)
+    ax.legend(fontsize=8)
+plt.tight_layout()
+sweep_path = os.path.join(fig3d_dir, "05_threshold_sensitivity_sweep_degree3_rescaled.png")
+plt.savefig(sweep_path, dpi=150)
+plt.close()
+print(f"Saved {sweep_path}")
 
 print("=" * 60)
 print("SUCCESS: Nonlinear SINDy fitting, validation, and plotting complete!")

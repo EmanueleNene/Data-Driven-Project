@@ -62,14 +62,37 @@ def maxwell_3d_nonlinear_ode(t, S, eps_dot_func, t_array):
 # Strain Rate Loadings
 # ==========================================
 def uniaxial_strain_rate(t, t_array):
-    """Uniaxial cyclic loading along x-direction (Training)."""
-    eps_xx_dot = 0.15 * (np.sin(2 * np.pi * 0.5 * t) + 0.5 * np.sin(2 * np.pi * 1.5 * t))
-    return np.array([eps_xx_dot, 0, 0, 0, 0, 0])
+    """Biaxial, multi-tone normal loading (Training, S_xx model).
+
+    A pure single-axis path forces S_yy = -0.5*S_xx exactly at every instant
+    (isotropic deviatoric projection of a single-component strain input), which makes
+    sigma_eq^2 an exact cubic function of S_xx alone -- i.e. the "Seq" coupling feature
+    and the S^3 library term become perfectly collinear, regardless of how the signal
+    is shaped. Exciting an independent second normal direction (e_yy, different
+    frequencies/amplitude than e_xx) breaks that exact kinematic identity, which is a
+    prerequisite for fitting a degree>1 library (Section on richer library, results.tex).
+    """
+    eps_xx_dot = 0.20 * (np.sin(2 * np.pi * 0.5 * t) + 0.7 * np.sin(2 * np.pi * 2.3 * t)
+                          + 0.5 * np.sin(2 * np.pi * 5.1 * t) + 0.4 * np.sin(2 * np.pi * 8.7 * t)
+                          + 0.3 * np.sin(2 * np.pi * 13.0 * t))
+    eps_yy_dot = 0.15 * (np.sin(2 * np.pi * 0.9 * t) + 0.6 * np.sin(2 * np.pi * 3.3 * t)
+                          + 0.4 * np.sin(2 * np.pi * 7.2 * t) + 0.3 * np.sin(2 * np.pi * 11.5 * t))
+    return np.array([eps_xx_dot, eps_yy_dot, 0, 0, 0, 0])
 
 def pure_shear_strain_rate(t, t_array):
-    """Pure shear cyclic loading in xy-plane (Training)."""
-    gamma_xy_dot = 0.15 * (np.sin(2 * np.pi * 0.5 * t) + 0.5 * np.sin(2 * np.pi * 1.5 * t))
-    return np.array([0, 0, 0, gamma_xy_dot, 0, 0])
+    """Biaxial, multi-tone shear loading (Training, S_xy model).
+
+    Same reasoning as above applies to shear: a single shear channel forces the other
+    two shear stresses to stay identically zero, making sigma_eq^2 an exact cubic
+    function of S_xy alone. Adding an independent second shear channel (g_xz, different
+    frequencies/amplitude than g_xy) breaks that identity.
+    """
+    gamma_xy_dot = 0.20 * (np.sin(2 * np.pi * 0.6 * t) + 0.7 * np.sin(2 * np.pi * 2.5 * t)
+                            + 0.5 * np.sin(2 * np.pi * 5.4 * t) + 0.4 * np.sin(2 * np.pi * 9.1 * t)
+                            + 0.3 * np.sin(2 * np.pi * 12.6 * t))
+    gamma_xz_dot = 0.15 * (np.sin(2 * np.pi * 1.1 * t) + 0.6 * np.sin(2 * np.pi * 3.6 * t)
+                            + 0.4 * np.sin(2 * np.pi * 7.9 * t) + 0.3 * np.sin(2 * np.pi * 11.2 * t))
+    return np.array([0, 0, 0, gamma_xy_dot, 0, gamma_xz_dot])
 
 def combined_strain_rate(t, t_array):
     """Combined multiaxial loading: uniaxial x + shear xy (Validation)."""
@@ -125,8 +148,8 @@ print("Generating Coupled Nonlinear Viscoelastic Datasets (Option 2)")
 print(f"G = {G_true} MPa, eta_0 = {eta_0_true} MPa*s, alpha = {alpha_true} 1/MPa^2")
 print("=" * 60)
 
-train_uniaxial = generate_dataset(uniaxial_strain_rate, "Uniaxial Tension (Training)")
-train_shear = generate_dataset(pure_shear_strain_rate, "Pure Shear (Training)")
+train_uniaxial = generate_dataset(uniaxial_strain_rate, "Biaxial Normal, multi-tone (Training)")
+train_shear = generate_dataset(pure_shear_strain_rate, "Biaxial Shear, multi-tone (Training)")
 val_combined = generate_dataset(combined_strain_rate, "Combined Load (Validation)")
 val_biaxial = generate_dataset(biaxial_strain_rate, "Biaxial Tension (Validation)")
 
